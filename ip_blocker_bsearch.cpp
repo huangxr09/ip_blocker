@@ -7,20 +7,8 @@
 #include <algorithm>
 using namespace std;
 
-static vector<string> ip_ranges_raw{
-  "2.144.0.0/14",
-  "2.176.0.0/12",
-  "5.0.0.0/16",
-  "5.22.0.0/17",
-  "5.22.192.0/19",
-  "212.110.156.0/22",
-  "213.59.160.0/20",
-  "217.147.8.0/22",
-  "217.175.0.0/20"
-};
-
 /*****************************************************
- * 自定义的原始数据比较方案
+ * customized compare function
  *****************************************************/
 bool comp(string s1, string s2) {
   int mask1 = 0, mask2 = 0;
@@ -48,7 +36,7 @@ bool comp(string s1, string s2) {
 }
 
 /*****************************************************
- * 转换mask
+ * convert mask (0-32) to interger
  *****************************************************/
 in_addr_t netmask(int prefix) {
   if (prefix == 0) {
@@ -59,7 +47,7 @@ in_addr_t netmask(int prefix) {
 }
 
 /*****************************************************
- * 将ip转为整型
+ * convert dotted ip to interger
  *****************************************************/
 unsigned long ipToUInt(const std::string ip) {
   int a, b, c, d;
@@ -77,7 +65,7 @@ unsigned long ipToUInt(const std::string ip) {
 }
 
 /*****************************************************
- * 将1.1.1.1/24形式转换为整型范围
+ * convert 1.1.1.1/24 to integer style min_ip and max_ip
  *****************************************************/
 vector<unsigned long> getIpRangesInt(vector<string> ips) {
   vector<unsigned long> ip_ranges;
@@ -103,7 +91,7 @@ vector<unsigned long> getIpRangesInt(vector<string> ips) {
 }
 
 /*****************************************************
- * 将区间融合,形成保序并且无交叉的区间序列
+ * merge the ranges to avoid overlaps
  *****************************************************/
 vector<unsigned long> mergeRanges(vector<unsigned long> ips) {
   vector<unsigned long> res;
@@ -135,18 +123,18 @@ vector<unsigned long> mergeRanges(vector<unsigned long> ips) {
 }
 
 /*****************************************************
- * IpBlocker
+ * IpBlocker constructor
  *****************************************************/
-IpBlocker::IpBlocker() {
+IpBlocker::IpBlocker(vector<string>& ip_ranges_raw) {
   sort(ip_ranges_raw.begin(), ip_ranges_raw.end(), comp);
   vector<unsigned long> tmp = getIpRangesInt(ip_ranges_raw);
   ip_ranges_res = mergeRanges(tmp);
 }
 
 /*****************************************************
- * IsIpInBlackList: 判断是否在黑名单内
+ * IsIpInRanges: determine whether the ip is in the ranges
  *****************************************************/
-bool IpBlocker::IsIpInBlackList(const string &ip) {
+bool IpBlocker::IsIpInRanges(const string &ip) {
   unsigned long ip_int = ipToUInt(ip);
 
   if (ip_int < ip_ranges_res[0] || ip_int > ip_ranges_res.back()) {

@@ -12,12 +12,12 @@ using namespace std;
 
 class IpBlocker {
  public:
-  IpBlocker();
+  IpBlocker(vector<string>& ip_ranges_raw);
 
-  bool IsIpInBlackList(const string &ip);
+  bool IsIpInRanges(const string &ip);
  private:
   map<unsigned int, map<unsigned int, int> > ip_check_map;
-  unsigned int GetMask(int prefix);
+  unsigned int getMask(int prefix);
 };
 
 #endif
